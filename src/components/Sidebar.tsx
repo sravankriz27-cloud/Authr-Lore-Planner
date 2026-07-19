@@ -21,7 +21,12 @@ import {
   Moon
 } from 'lucide-react';
 
-export default function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const user = useAppStore((state) => state.user);
   const universes = useAppStore((state) => state.universes);
   const selectedUniverseId = useAppStore((state) => state.selectedUniverseId);
@@ -55,17 +60,34 @@ export default function Sidebar() {
       setIsCreatingUniv(false);
       setNewTitle('');
       setNewDesc('');
+      if (onClose) onClose();
     } else {
       setError('Could not create. Please try again.');
     }
   };
 
+  const handleTabClick = (tab: 'chapters' | 'lore' | 'settings') => {
+    setActiveTab(tab);
+    if (onClose) onClose();
+  };
+
   return (
-    <aside className={`w-64 flex flex-col h-full shrink-0 select-none transition-colors duration-200 ${
-      theme === 'dark' 
-        ? 'bg-[#0E0E0E] border-r border-white/10 text-gray-300' 
-        : 'bg-[#F4F4F5] border-r border-gray-200 text-gray-600'
-    }`}>
+    <>
+      {/* Mobile Drawer Backdrop */}
+      {isOpen && (
+        <div 
+          onClick={onClose}
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 md:hidden transition-opacity duration-300"
+        />
+      )}
+
+      <aside className={`fixed inset-y-0 left-0 w-64 flex flex-col h-full shrink-0 select-none z-50 transition-transform duration-300 md:static md:translate-x-0 ${
+        isOpen ? 'translate-x-0' : '-translate-x-full'
+      } ${
+        theme === 'dark' 
+          ? 'bg-[#0E0E0E] border-r border-white/10 text-gray-300' 
+          : 'bg-[#F4F4F5] border-r border-gray-200 text-gray-600'
+      }`}>
       {/* Brand header */}
       <div className={`h-14 px-4 flex items-center justify-between transition-colors duration-200 ${
         theme === 'dark' ? 'bg-[#111111] border-b border-white/10' : 'bg-white border-b border-gray-200'
@@ -128,6 +150,7 @@ export default function Sidebar() {
                   onClick={() => {
                     selectUniverse(u.id);
                     setIsOpenDropdown(false);
+                    if (onClose) onClose();
                   }}
                   className={`w-full text-left px-4 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${
                     theme === 'dark'
@@ -234,7 +257,7 @@ export default function Sidebar() {
               workspace navigation
             </label>
             <button
-              onClick={() => setActiveTab('chapters')}
+              onClick={() => handleTabClick('chapters')}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded text-xs font-semibold transition-all cursor-pointer ${
                 activeTab === 'chapters'
                   ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-l-2 border-indigo-500'
@@ -246,7 +269,7 @@ export default function Sidebar() {
             </button>
             
             <button
-              onClick={() => setActiveTab('lore')}
+              onClick={() => handleTabClick('lore')}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded text-xs font-semibold transition-all cursor-pointer ${
                 activeTab === 'lore'
                   ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-l-2 border-indigo-500'
@@ -258,7 +281,7 @@ export default function Sidebar() {
             </button>
 
             <button
-              onClick={() => setActiveTab('settings')}
+              onClick={() => handleTabClick('settings')}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded text-xs font-semibold transition-all cursor-pointer ${
                 activeTab === 'settings'
                   ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-l-2 border-indigo-500'
@@ -328,6 +351,7 @@ export default function Sidebar() {
           </div>
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
