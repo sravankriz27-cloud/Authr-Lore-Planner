@@ -1,0 +1,6 @@
+{
+  "name": "Authr",
+  "description": "A stylized CMS for creative writers to build multi-chapter universes, organize character bios, and drag-and-drop sequence chapters with rich-text autosave.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
