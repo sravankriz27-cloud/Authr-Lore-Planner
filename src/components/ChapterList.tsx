@@ -105,7 +105,7 @@ export default function ChapterList() {
   };
 
   return (
-    <div className={`w-64 flex flex-col h-full shrink-0 select-none transition-colors duration-200 ${
+    <div className={`w-full md:w-64 flex flex-col h-full shrink-0 select-none transition-colors duration-200 ${
       theme === 'dark' ? 'bg-[#0E0E0E] border-r border-white/10 text-gray-300' : 'bg-white border-r border-gray-200 text-gray-700'
     }`}>
       {/* Header with quick creation */}
