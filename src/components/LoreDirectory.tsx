@@ -14,7 +14,8 @@ import {
   ShieldAlert, 
   Eye, 
   Tag,
-  UserCheck
+  UserCheck,
+  ChevronLeft
 } from 'lucide-react';
 import { Character } from '../types';
 
@@ -120,7 +121,9 @@ export default function LoreDirectory() {
     }`}>
       
       {/* List Panel */}
-      <div className={`w-80 border-r flex flex-col h-full shrink-0 select-none transition-colors duration-200 ${
+      <div className={`shrink-0 select-none transition-colors duration-200 ${
+        selectedCharacterId ? 'hidden md:flex' : 'w-full md:w-80'
+      } border-r flex flex-col h-full ${
         theme === 'dark' ? 'border-white/10 bg-[#0E0E0E]' : 'border-gray-200 bg-white'
       }`}>
         
@@ -224,7 +227,9 @@ export default function LoreDirectory() {
       </div>
 
       {/* Main Detail Panel */}
-      <div className={`flex-1 overflow-y-auto p-8 flex justify-center scrollbar-thin transition-colors duration-200 ${
+      <div className={`flex-1 overflow-y-auto md:p-8 p-4 flex justify-center scrollbar-thin transition-colors duration-200 ${
+        !selectedCharacterId ? 'hidden md:flex' : 'flex'
+      } ${
         theme === 'dark' ? 'bg-[#0A0A0A]' : 'bg-[#FAFAFA]'
       }`}>
         {selectedChar ? (
@@ -233,22 +238,31 @@ export default function LoreDirectory() {
           }`}>
             
             {/* Banner details */}
-            <div className={`relative px-8 py-8 border-b flex items-center gap-6 shrink-0 transition-colors duration-200 ${
+            <div className={`relative px-4 md:px-8 py-5 md:py-8 border-b flex items-center gap-3 md:gap-6 shrink-0 transition-colors duration-200 ${
               theme === 'dark' ? 'bg-[#111111] border-white/10' : 'bg-gray-50 border-gray-200'
             }`}>
-              <div className={`w-16 h-16 rounded border-2 flex items-center justify-center text-3xl shadow-sm transition-colors duration-200 ${
+              {/* Back button on mobile */}
+              <button
+                onClick={() => setSelectedCharacterId(null)}
+                className="md:hidden p-1.5 rounded text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer shrink-0"
+                title="Back to List"
+              >
+                <ChevronLeft size={18} />
+              </button>
+
+              <div className={`w-12 h-12 md:w-16 md:h-16 rounded border-2 flex items-center justify-center text-2xl md:text-3xl shadow-sm shrink-0 transition-colors duration-200 ${
                 theme === 'dark' ? 'bg-[#151515] border-indigo-500/30' : 'bg-white border-indigo-200'
               }`}>
                 {selectedChar.avatar}
               </div>
-              <div className="min-w-0">
-                <h2 className={`text-xl font-bold truncate ${theme === 'dark' ? 'text-white' : 'text-gray-950'}`}>{selectedChar.name}</h2>
-                <span className="inline-flex items-center gap-1 text-[10px] text-indigo-500 font-mono font-bold uppercase tracking-wider mt-1.5">
+              <div className="min-w-0 flex-1">
+                <h2 className={`text-base md:text-xl font-bold truncate ${theme === 'dark' ? 'text-white' : 'text-gray-950'}`}>{selectedChar.name}</h2>
+                <span className="inline-flex items-center gap-1 text-[9px] md:text-[10px] text-indigo-500 font-mono font-bold uppercase tracking-wider mt-1 md:mt-1.5">
                   <Tag size={10} /> {selectedChar.traits.role}
                 </span>
               </div>
 
-              <div className="absolute right-6 top-6 flex gap-2">
+              <div className="flex gap-1.5 shrink-0 ml-2">
                 <button
                   onClick={() => handleOpenEdit(selectedChar)}
                   className={`w-8 h-8 rounded border flex items-center justify-center transition-all cursor-pointer ${
