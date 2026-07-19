@@ -1,0 +1,83 @@
+{
+  "users": [
+    {
+      "id": "user-demo",
+      "username": "demo",
+      "name": "demo_writer",
+      "createdAt": "2026-07-18T17:07:34.304Z"
+    }
+  ],
+  "credentials": {
+    "demo": "demo123"
+  },
+  "universes": [
+    {
+      "id": "univ-demo-1",
+      "title": "The Chrono Chronicles",
+      "description": "An epic sci-fi universe centering around time-travel paradoxes and memory-stealing temporal storms.",
+      "ownerId": "user-demo",
+      "createdAt": "2026-07-18T17:07:34.304Z",
+      "updatedAt": "2026-07-18T17:07:34.304Z"
+    },
+    {
+      "id": "univ-tn7ld434f",
+      "title": "sakaa",
+      "description": "",
+      "ownerId": "user-demo",
+      "createdAt": "2026-07-19T07:29:28.792Z",
+      "updatedAt": "2026-07-19T07:29:28.792Z"
+    }
+  ],
+  "characters": [
+    {
+      "id": "char-demo-1",
+      "name": "Aiden Vance",
+      "bio": "A rogue chronologist who discovered the first stable wormhole in his garage. He is brilliant but constantly distracted by alternate timelines.",
+      "traits": {
+        "role": "Protagonist",
+        "personality": "Sarcastic, fiercely loyal, deeply regretful of past timeline edits.",
+        "appearance": "Mid-30s, windswept graying hair, wears a leather jacket patched with copper wires.",
+        "abilities": "Can remember alternate timelines that have been erased."
+      },
+      "universeId": "univ-demo-1",
+      "avatar": "🧭",
+      "createdAt": "2026-07-18T17:07:34.304Z"
+    },
+    {
+      "id": "char-demo-2",
+      "name": "Lyra Vance",
+      "bio": "Aiden's daughter from a future timeline that technically no longer exists. She travels back to warn him of a looming timeline collapse.",
+      "traits": {
+        "role": "Supporting",
+        "personality": "Highly focused, disciplined, carrying the weight of a dying world.",
+        "appearance": "Late teens, athletic build, silver cybernetic left eye.",
+        "abilities": "Possesses future knowledge and advanced temporal weaponry."
+      },
+      "universeId": "univ-demo-1",
+      "avatar": "⌛",
+      "createdAt": "2026-07-18T17:07:34.304Z"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "chap-demo-1",
+      "title": "sdadadad",
+      "content": "<h3><br></h3><div><br></div><blockquote><ul><li>khkj<i>jkhkhkhhjjkjk</i>hkjkjkhkjjkhk</li></ul></blockquote><h3><br></h3><h3><br></h3><h3>adadadadadadadadadadad</h3>",
+      "orderIndex": 0,
+      "universeId": "univ-demo-1",
+      "isPublished": false,
+      "createdAt": "2026-07-18T17:07:34.304Z",
+      "updatedAt": "2026-07-19T07:17:48.495Z"
+    },
+    {
+      "id": "chap-demo-2",
+      "title": "Echoes of a Future",
+      "content": "<h2>Chapter 2: Echoes of a Future</h2><p>The temporal storm hit without warning. Aiden woke up on his garage floor to the sound of shattered glass and a blinding flash of light.</p><p>Standing in front of the flickering temporal rift was a young woman. Her clothes were scorched, and her left eye gleamed with a metallic, cybernetic sheen.</p><p>She looked directly at Aiden, her eyes widening in disbelief. <i>\"Dad?\"</i> she whispered.</p>",
+      "orderIndex": 1,
+      "universeId": "univ-demo-1",
+      "isPublished": false,
+      "createdAt": "2026-07-18T17:07:34.304Z",
+      "updatedAt": "2026-07-19T07:18:04.107Z"
+    }
+  ]
+}
