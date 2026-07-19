@@ -23,7 +23,8 @@ import {
   Eye, 
   EyeOff,
   Clock,
-  BookOpen
+  BookOpen,
+  ChevronLeft
 } from 'lucide-react';
 import { typewriterSound } from '../utils/sound';
 import DOMPurify from 'dompurify';
@@ -31,6 +32,7 @@ import DOMPurify from 'dompurify';
 export default function Editor() {
   const selectedUniverseId = useAppStore((state) => state.selectedUniverseId);
   const selectedChapterId = useAppStore((state) => state.selectedChapterId);
+  const selectChapter = useAppStore((state) => state.selectChapter);
   const chapters = useAppStore((state) => state.chapters);
   const updateChapter = useAppStore((state) => state.updateChapter);
   const saveStatus = useAppStore((state) => state.saveStatus);
@@ -256,12 +258,21 @@ export default function Editor() {
     } ${theme === 'dark' ? 'bg-[#0A0A0A]' : 'bg-white'}`}>
       
       {/* Editor Control Header */}
-      <div className={`h-14 border-b px-6 flex items-center justify-between shrink-0 transition-colors duration-200 ${
+      <div className={`md:h-14 py-2 md:py-0 border-b px-4 md:px-6 flex flex-wrap md:flex-nowrap items-center justify-between shrink-0 gap-2 transition-colors duration-200 ${
         theme === 'dark' ? 'border-white/10 bg-[#111111]' : 'border-gray-200 bg-gray-50'
       }`}>
         
         {/* Left Side: Chapter Detail & Auto-save Status */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 md:gap-3">
+          {/* Back button on mobile */}
+          <button
+            onClick={() => selectChapter(null)}
+            className="md:hidden p-1.5 rounded text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 mr-1 cursor-pointer shrink-0"
+            title="Back to Outline"
+          >
+            <ChevronLeft size={18} />
+          </button>
+
           <button
             onClick={togglePublishState}
             className={`px-3 py-1 rounded text-[10px] font-mono font-medium flex items-center gap-1 cursor-pointer transition-colors ${
@@ -346,7 +357,7 @@ export default function Editor() {
       </div>
 
       {/* Elegant floating formatting toolbar */}
-      <div className={`h-11 border-b px-6 flex items-center gap-1 shrink-0 select-none transition-colors duration-200 ${
+      <div className={`md:h-11 py-1.5 md:py-0 overflow-x-auto scrollbar-none border-b px-4 md:px-6 flex items-center gap-1 shrink-0 select-none transition-colors duration-200 ${
         theme === 'dark' ? 'border-white/5 bg-[#111111]' : 'border-gray-200 bg-gray-50'
       }`}>
         <button
@@ -463,7 +474,7 @@ export default function Editor() {
       </div>
 
       {/* Editor Main Canvas */}
-      <div className={`flex-1 overflow-y-auto px-12 py-10 flex justify-center scrollbar-thin relative transition-colors duration-200 ${
+      <div className={`flex-1 overflow-y-auto px-4 md:px-12 py-6 md:py-10 flex justify-center scrollbar-thin relative transition-colors duration-200 ${
         theme === 'dark' ? 'bg-[#0A0A0A]' : 'bg-white'
       }`}>
         <div className="w-full max-w-2xl flex flex-col h-full relative">
@@ -475,7 +486,7 @@ export default function Editor() {
             onChange={handleTitleChange}
             onKeyDown={handleKeyDown}
             placeholder="Name your chapter..."
-            className={`w-full bg-transparent border-none text-4xl font-serif font-bold mb-8 focus:ring-0 focus:outline-none transition-all ${
+            className={`w-full bg-transparent border-none text-2xl md:text-4xl font-serif font-bold mb-6 md:mb-8 focus:ring-0 focus:outline-none transition-all ${
               theme === 'dark' ? 'text-white placeholder-gray-800' : 'text-gray-950 placeholder-gray-300'
             }`}
           />
@@ -489,7 +500,7 @@ export default function Editor() {
             onKeyUp={updateActiveFormats}
             onMouseUp={updateActiveFormats}
             onFocus={updateActiveFormats}
-            className={`flex-1 w-full bg-transparent focus:outline-none prose max-w-none text-lg leading-relaxed font-serif space-y-6 ${
+            className={`flex-1 w-full bg-transparent focus:outline-none prose max-w-none text-base md:text-lg leading-relaxed font-serif space-y-4 md:space-y-6 pb-24 ${
               theme === 'dark' ? 'text-gray-300 prose-invert prose-indigo' : 'text-gray-800 prose-indigo'
             }`}
             style={{ minHeight: '350px' }}
@@ -498,13 +509,13 @@ export default function Editor() {
       </div>
 
       {/* Floating Bottom UI */}
-      <div className={`absolute bottom-6 right-8 flex items-center gap-2 px-3 py-1.5 rounded-full shadow-2xl text-[11px] font-medium z-10 transition-colors duration-200 ${
+      <div className={`fixed md:absolute bottom-4 left-4 right-4 md:left-auto md:right-8 md:bottom-6 flex items-center justify-center md:justify-start gap-2 px-3 py-1.5 rounded-full shadow-2xl text-[10px] md:text-[11px] font-medium z-10 transition-colors duration-200 ${
         theme === 'dark' ? 'bg-[#151515] border border-white/10' : 'bg-white border border-gray-200'
       }`}>
-        <span className="text-gray-500 uppercase tracking-tighter">Reading Time:</span>
+        <span className="text-gray-500 uppercase tracking-tighter">Read:</span>
         <span className="text-indigo-500 font-mono">{calculateReadingTime()}</span>
-        <span className={`mx-2 text-xs ${theme === 'dark' ? 'text-gray-700' : 'text-gray-300'}`}>|</span>
-        <span className="text-gray-500 uppercase tracking-tighter">Word Count:</span>
+        <span className={`mx-1 text-xs ${theme === 'dark' ? 'text-gray-700' : 'text-gray-300'}`}>|</span>
+        <span className="text-gray-500 uppercase tracking-tighter">Words:</span>
         <span className="text-indigo-500 font-mono">{wordCount.toLocaleString()}</span>
       </div>
     </div>
