@@ -11,7 +11,7 @@ import ChapterList from './components/ChapterList';
 import Editor from './components/Editor';
 import LoreDirectory from './components/LoreDirectory';
 import UniverseSettings from './components/UniverseSettings';
-import { PenTool, Library, BookOpen, Quote, HelpCircle } from 'lucide-react';
+import { PenTool, Library, BookOpen, Quote, HelpCircle, Menu } from 'lucide-react';
 import { motion } from 'motion/react';
 
 const WRITING_QUOTES = [
@@ -30,10 +30,13 @@ export default function App() {
   const fetchChapters = useAppStore((state) => state.fetchChapters);
   const fetchCharacters = useAppStore((state) => state.fetchCharacters);
   const selectedUniverseId = useAppStore((state) => state.selectedUniverseId);
+  const selectedChapterId = useAppStore((state) => state.selectedChapterId);
+  const universes = useAppStore((state) => state.universes);
   const activeTab = useAppStore((state) => state.activeTab);
   const theme = useAppStore((state) => state.theme);
 
   const [quoteIdx, setQuoteIdx] = useState(0);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Initial authentication check on load
   useEffect(() => {
@@ -73,8 +76,12 @@ export default function App() {
       case 'chapters':
         return (
           <div className="flex flex-1 h-full overflow-hidden">
-            <ChapterList />
-            <Editor />
+            <div className={`h-full shrink-0 ${selectedChapterId ? 'hidden md:block' : 'w-full md:block'}`}>
+              <ChapterList />
+            </div>
+            <div className={`flex-1 h-full ${!selectedChapterId ? 'hidden md:block' : 'w-full md:block'}`}>
+              <Editor />
+            </div>
           </div>
         );
       case 'lore':
@@ -92,10 +99,38 @@ export default function App() {
     }`}>
       
       {/* Outer Sidebar Selector */}
-      <Sidebar />
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       {/* Main workspace section */}
       <main className="flex-1 flex flex-col h-full overflow-hidden relative">
+        {/* Mobile Top Header */}
+        <div className={`md:hidden h-14 px-4 flex items-center justify-between shrink-0 border-b transition-colors duration-200 ${
+          theme === 'dark' ? 'bg-[#0E0E0E] border-white/10 text-gray-300' : 'bg-white border-gray-200 text-gray-800'
+        }`}>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className={`p-1.5 rounded transition-colors cursor-pointer ${
+                theme === 'dark' ? 'hover:bg-white/5 text-gray-400 hover:text-white' : 'hover:bg-gray-100 text-gray-500 hover:text-gray-900'
+              }`}
+              title="Open Navigation Menu"
+            >
+              <Menu size={20} />
+            </button>
+            <span className="text-xs font-semibold uppercase tracking-wider font-sans">
+              {activeTab === 'chapters' ? 'Chapters & Outline' : activeTab === 'lore' ? 'Lore & Characters' : 'Universe Settings'}
+            </span>
+          </div>
+          
+          {selectedUniverseId && (
+            <span className={`text-[10px] px-2 py-0.5 rounded font-mono font-medium truncate max-w-[140px] ${
+              theme === 'dark' ? 'bg-indigo-950/40 border border-indigo-500/30 text-indigo-400' : 'bg-indigo-50 border border-indigo-200 text-indigo-600'
+            }`}>
+              {universes.find(u => u.id === selectedUniverseId)?.title || 'Universe'}
+            </span>
+          )}
+        </div>
+
         {selectedUniverseId ? (
           // Active workspace rendering
           renderWorkspaceContent()
