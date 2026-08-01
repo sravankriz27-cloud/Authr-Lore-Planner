@@ -6,7 +6,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
-import { readDb, writeDb } from './serverDb';
+import { readDb, writeDb, getDbDiagnostics } from './serverDb';
 import { User, Universe, Character, Chapter } from './src/types';
 
 // Add custom properties to Express Request types
@@ -64,6 +64,13 @@ async function startServer() {
   // ==========================================
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
+  app.get('/api/db-status', async (req, res) => {
+    // Attempt a quick db read to trigger connection test if needed
+    await readDb();
+    const status = getDbDiagnostics();
+    res.json(status);
   });
 
   // ==========================================
