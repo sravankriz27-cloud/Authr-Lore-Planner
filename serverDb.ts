@@ -10,10 +10,48 @@ import { MongoClient } from 'mongodb';
 const DB_DIR = path.join(process.cwd(), 'data');
 const DB_FILE = path.join(DB_DIR, 'db.json');
 
-const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
-
 let mongoClient: MongoClient | null = null;
-let memoryCache: any = null;
+let dbStatus = {
+  isPersistent: false,
+  type: 'local_file',
+  connected: false,
+  message: 'Initializing...',
+  uriProvided: false,
+  errorDetails: null as string | null
+};
+
+// Sanitizes user-provided MongoDB URIs (e.g., handles angle brackets `<password>`, quotes, trailing spaces)
+export function getSanitizedMongoUri(): string | null {
+  let uri = process.env.MONGODB_URI || process.env.MONGO_URI;
+  if (!uri) return null;
+
+  uri = uri.trim();
+  if ((uri.startsWith('"') && uri.endsWith('"')) || (uri.startsWith("'") && uri.endsWith("'"))) {
+    uri = uri.substring(1, uri.length - 1).trim();
+  }
+
+  // Regex to detect password pattern: mongodb(+srv)://username:password@host...
+  const match = uri.match(/^(mongodb(?:\+srv)?:\/\/([^:]+):)([^@]+)(@.+)$/);
+  if (match) {
+    const prefix = match[1]; // mongodb+srv://username:
+    let pass = match[3];      // password or <password>
+    const suffix = match[4]; // @cluster...
+
+    // If password is wrapped in angle brackets like <myPass123>, strip the brackets
+    if (pass.startsWith('<') && pass.endsWith('>')) {
+      pass = pass.substring(1, pass.length - 1);
+    }
+
+    // Warn if password was left as default placeholder
+    if (pass === 'db_password' || pass === 'password' || pass === 'your_password' || pass === '<db_password>') {
+      console.warn('⚠️ MONGODB_URI contains unreplaced placeholder password!');
+    }
+
+    return `${prefix}${encodeURIComponent(pass)}${suffix}`;
+  }
+
+  return uri;
+}
 
 // Initial template if database is brand new
 const getInitialData = () => ({
@@ -87,34 +125,64 @@ const getInitialData = () => ({
   ]
 });
 
-let mongoConnectionFailed = false;
-
 async function getMongoClient(): Promise<MongoClient> {
   if (mongoClient) return mongoClient;
-  if (!MONGODB_URI) {
+
+  const mongoUri = getSanitizedMongoUri();
+  if (!mongoUri) {
+    dbStatus = {
+      isPersistent: false,
+      type: 'local_file',
+      connected: false,
+      message: 'MONGODB_URI is not set in environment variables. Running on temporary container disk.',
+      uriProvided: false,
+      errorDetails: 'Missing MONGODB_URI environment variable'
+    };
     throw new Error('MONGODB_URI environment variable is not defined.');
   }
+
   try {
-    mongoClient = new MongoClient(MONGODB_URI, {
-      connectTimeoutMS: 4000,
-      serverSelectionTimeoutMS: 4000,
+    const client = new MongoClient(mongoUri, {
+      connectTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 5000,
     });
-    await mongoClient.connect();
-    console.log('Successfully connected to MongoDB Cloud Database!');
+    await client.connect();
+    mongoClient = client;
+    dbStatus = {
+      isPersistent: true,
+      type: 'mongodb_atlas',
+      connected: true,
+      message: 'Successfully connected to persistent Cloud MongoDB Database!',
+      uriProvided: true,
+      errorDetails: null
+    };
+    console.log('✅ Successfully connected to MongoDB Atlas Cloud Database!');
     return mongoClient;
-  } catch (err) {
+  } catch (err: any) {
     mongoClient = null;
+    const errMsg = err?.message || String(err);
+    dbStatus = {
+      isPersistent: false,
+      type: 'local_file',
+      connected: false,
+      message: 'MongoDB connection failed. Check password and MongoDB Atlas Network Access (Allow 0.0.0.0/0).',
+      uriProvided: true,
+      errorDetails: errMsg
+    };
+    console.error('❌ MongoDB Atlas Connection Failed:', errMsg);
     throw err;
   }
 }
 
+export function getDbDiagnostics() {
+  return dbStatus;
+}
+
 // Read database
 export async function readDb() {
-  if (memoryCache) {
-    return memoryCache;
-  }
+  const mongoUri = getSanitizedMongoUri();
 
-  if (MONGODB_URI && !mongoConnectionFailed) {
+  if (mongoUri) {
     try {
       const client = await getMongoClient();
       const db = client.db('lore-planner');
@@ -122,17 +190,14 @@ export async function readDb() {
       const doc = await collection.findOne({ _id: 'global_state' as any });
       if (doc) {
         const { _id, ...rest } = doc;
-        memoryCache = rest;
-        return memoryCache;
+        return rest;
       } else {
         const initial = getInitialData();
         await collection.insertOne({ _id: 'global_state' as any, ...initial });
-        memoryCache = initial;
-        return memoryCache;
+        return initial;
       }
     } catch (err: any) {
-      console.error('Failed to read from MongoDB, falling back to local storage:', err);
-      mongoConnectionFailed = true;
+      // Fallback silently to local storage for this attempt
     }
   }
 
@@ -144,14 +209,12 @@ export async function readDb() {
   if (!fs.existsSync(DB_FILE)) {
     const initial = getInitialData();
     fs.writeFileSync(DB_FILE, JSON.stringify(initial, null, 2), 'utf-8');
-    memoryCache = initial;
-    return memoryCache;
+    return initial;
   }
 
   try {
     const content = fs.readFileSync(DB_FILE, 'utf-8');
-    memoryCache = JSON.parse(content);
-    return memoryCache;
+    return JSON.parse(content);
   } catch (err) {
     console.error('Error reading local DB file:', err);
     return getInitialData();
@@ -160,9 +223,9 @@ export async function readDb() {
 
 // Write database
 export async function writeDb(data: any) {
-  memoryCache = data;
+  const mongoUri = getSanitizedMongoUri();
 
-  if (MONGODB_URI && !mongoConnectionFailed) {
+  if (mongoUri) {
     try {
       const client = await getMongoClient();
       const db = client.db('lore-planner');
@@ -173,9 +236,8 @@ export async function writeDb(data: any) {
         { upsert: true }
       );
       return;
-    } catch (err) {
-      console.error('Failed to write to MongoDB, fallback saving to local:', err);
-      mongoConnectionFailed = true;
+    } catch (err: any) {
+      // Fallback to local disk write
     }
   }
 
